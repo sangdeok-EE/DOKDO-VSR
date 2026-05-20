@@ -10,7 +10,7 @@ Built by transfer-learning [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS
 
 ```bash
 git clone https://github.com/sangdeok-EE/DOKDO-VSR.git
-cd dokdo-vsr
+cd DOKDO-VSR
 pip install -r requirements.txt
 ```
 
@@ -81,7 +81,7 @@ Apache 2.0
 
 ```bash
 git clone https://github.com/sangdeok-EE/DOKDO-VSR.git
-cd dokdo-vsr
+cd DOKDO-VSR
 pip install -r requirements.txt
 ```
 
