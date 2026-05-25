@@ -19,7 +19,7 @@ Built by transfer-learning [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS
 | Dataset | Source | Size Used | Description |
 |---------|--------|-----------|-------------|
 | [OLKAVS](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&dataSetSn=538) | AI Hub | ~1.5 TB | Studio-recorded Korean speech, multi-view, 1,107 speakers |
-| KMSAV | ETRI | ~100 GB | Korean multimedia speech (YouTube) |
+| [KMSAV](https://github.com/etri/kmsav) | ETRI | ~100 GB | Korean multimedia speech (YouTube) |
 
 ## Performance
 
@@ -151,7 +151,7 @@ Apache 2.0
 | 데이터셋 | 출처 | 사용량 | 설명 |
 |---------|------|--------|------|
 | [OLKAVS](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&dataSetSn=538) | AI Hub | ~1.5 TB | 스튜디오 녹화 한국어 음성, 다시점, 1,107명 화자 |
-| KMSAV | ETRI | ~100 GB | 한국어 멀티미디어 음성 (YouTube) |
+| [KMSAV](https://github.com/etri/kmsav) | ETRI | ~100 GB | 한국어 멀티미디어 음성 (YouTube) |
 
 ## 성능
 
