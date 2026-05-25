@@ -1,0 +1,22 @@
+# ============================================================
+# Korean VSR - Dependencies
+# ============================================================
+# Install: pip install -r requirements.txt
+# ============================================================
+
+# Deep learning core
+torch>=2.0.0
+numpy>=1.24.0
+
+# Computer vision (preprocess.py)
+opencv-python>=4.8.0
+
+# Tokenizer
+sentencepiece>=0.1.99
+
+# ============================================================
+# External dependencies (install separately)
+# ============================================================
+# Chaplin detector (retinaface):
+#   pip install git+https://github.com/hhj1897/face_detection.git
+#   pip install git+https://github.com/hhj1897/face_alignment.git
