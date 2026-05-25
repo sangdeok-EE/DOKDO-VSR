@@ -4,6 +4,23 @@ Webcam-based Korean lip reading system. Recognizes Korean speech from lip moveme
 
 Built by transfer-learning [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS3, WER 19.1%) with Korean datasets (OLKAVS, KMSAV). See our paper for details.
 
+## Architecture
+
+![DOKDO Pipeline](assets/pipeline.jpeg)
+
+- **Frontend:** Conv3D + ResNet-18 visual feature extractor
+- **Encoder:** 12-layer Conformer (768-dim), pretrained on LRS3 (English)
+- **Decoder:** Hybrid CTC/Attention (L = 0.3 · L_CTC + 0.7 · L_CE)
+- **Preprocessing:** MediaPipe face detection → affine warp → 96x96 grayscale lip crop
+- **Training:** 2-phase transfer learning (Phase 1: encoder freeze + CTC head only → Phase 2: full fine-tune with differential LR)
+
+## Training Data
+
+| Dataset | Source | Size Used | Description |
+|---------|--------|-----------|-------------|
+| [OLKAVS](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&dataSetSn=538) | AI Hub | ~1.5 TB | Studio-recorded Korean speech, multi-view, 1,107 speakers |
+| KMSAV | ETRI | ~100 GB | Korean multimedia speech (YouTube) |
+
 ## Performance
 
 ![DOKDO Performance](assets/result.jpeg)
@@ -58,7 +75,7 @@ Place the trained `unigram8000.model` file in `pipelines/tokens/` and update the
 spm_model=pipelines/tokens/unigram8000.model
 ```
 
-> **Note:** For best results, the tokenizer should match the vocabulary used during model training. If you use a different tokenizer, the model output may be degraded.
+> **Note:** We used `vocab_size=8000` due to hardware constraints, but you can adjust this value to fit your setup. For best results, the tokenizer should match the vocabulary used during model training. If you use a different tokenizer, the model output may be degraded.
 
 ## Usage
 
@@ -119,6 +136,23 @@ Apache 2.0
 
 [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS3, WER 19.1%) 사전학습 모델을 한국어 데이터셋(OLKAVS, KMSAV)으로 전이학습하였습니다. 자세한 내용은 논문을 참고하세요.
 
+## 아키텍처
+
+![DOKDO 파이프라인](assets/pipeline.jpeg)
+
+- **프론트엔드:** Conv3D + ResNet-18 시각 특징 추출기
+- **인코더:** 12층 Conformer (768차원), LRS3 (영어) 사전학습
+- **디코더:** Hybrid CTC/Attention (L = 0.3 · L_CTC + 0.7 · L_CE)
+- **전처리:** MediaPipe 얼굴 검출 → 어파인 변환 → 96x96 흑백 입술 크롭
+- **학습:** 2단계 전이학습 (1단계: 인코더 동결 + CTC 헤드만 학습 → 2단계: 전체 미세조정, 차등 학습률)
+
+## 학습 데이터
+
+| 데이터셋 | 출처 | 사용량 | 설명 |
+|---------|------|--------|------|
+| [OLKAVS](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&dataSetSn=538) | AI Hub | ~1.5 TB | 스튜디오 녹화 한국어 음성, 다시점, 1,107명 화자 |
+| KMSAV | ETRI | ~100 GB | 한국어 멀티미디어 음성 (YouTube) |
+
 ## 성능
 
 ![DOKDO 성능](assets/result.jpeg)
@@ -173,7 +207,7 @@ spm.SentencePieceTrainer.train(
 spm_model=pipelines/tokens/unigram8000.model
 ```
 
-> **참고:** 모델 학습 시 사용된 어휘와 동일한 토크나이저를 사용해야 최적의 성능을 얻을 수 있습니다. 다른 토크나이저를 사용하면 모델 출력이 저하될 수 있습니다.
+> **참고:** 저희는 하드웨어 제약으로 `vocab_size=8000`을 사용했지만, 환경에 맞게 조정할 수 있습니다. 모델 학습 시 사용된 어휘와 동일한 토크나이저를 사용해야 최적의 성능을 얻을 수 있습니다. 다른 토크나이저를 사용하면 모델 출력이 저하될 수 있습니다.
 
 ## 사용법
 
