@@ -8,16 +8,6 @@ Built by transfer-learning [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS
 
 ![DOKDO Pipeline](assets/pipeline.jpeg)
 
-- **Frontend:** Conv3D + ResNet-18 spatiotemporal feature extractor
-- **Encoder:** 12-layer Conformer (768-dim, 254.95M params), pretrained on LRS3 (English, WER 19.1%)
-- **Decoder:** Hybrid CTC + CE Loss (L = 0.3 · L_CTC + 0.7 · L_CE)
-- **Tokenizer:** SentencePiece Unigram (vocab=8,001, blank=8000)
-- **Preprocessing:** MediaPipe 4-keypoint face detection → affine warp to mean face → 96x96 grayscale lip crop → center crop(88x88) + normalization
-- **Training:** 2-phase transfer learning on single RTX 4090
-  - Phase 1 (epoch 1-5): Encoder frozen, CTC head only — stabilize Korean token prediction
-  - Phase 2 (epoch 6+): Full network unfreeze, differential LR (lower for encoder, higher for head) — preserve pretrained visual features while adapting to Korean
-- **Inference latency:** ~6.61s per 5.0s utterance (on MacBook Pro M5, CPU only)
-
 ## Training Data
 
 | Dataset | Source | Size Used | Description |
@@ -160,16 +150,6 @@ Apache 2.0
 ## 아키텍처
 
 ![DOKDO 파이프라인](assets/pipeline.jpeg)
-
-- **프론트엔드:** Conv3D + ResNet-18 시공간 특징 추출기
-- **인코더:** 12층 Conformer (768차원, 254.95M 파라미터), LRS3 (영어, WER 19.1%) 사전학습
-- **디코더:** Hybrid CTC + CE Loss (L = 0.3 · L_CTC + 0.7 · L_CE)
-- **토크나이저:** SentencePiece Unigram (vocab=8,001, blank=8000)
-- **전처리:** MediaPipe 4-keypoint 얼굴 검출 → mean face 기준 어파인 변환 → 96x96 흑백 입술 크롭 → center crop(88x88) + 정규화
-- **학습:** 단일 RTX 4090에서 2단계 전이학습
-  - 1단계 (epoch 1-5): 인코더 동결, CTC 헤드만 학습 — 한국어 토큰 예측 안정화
-  - 2단계 (epoch 6+): 전체 네트워크 unfreeze, 차등 학습률 (인코더 낮게, 헤드 높게) — 사전학습된 시각 특징 유지하며 한국어 적응
-- **추론 지연:** 5.0초 발화 기준 ~6.61초 (MacBook Pro M5, CPU 전용)
 
 ## 학습 데이터
 
