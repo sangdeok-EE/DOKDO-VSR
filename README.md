@@ -4,13 +4,23 @@ Webcam-based Korean lip reading system. Recognizes Korean speech from lip moveme
 
 Built by transfer-learning [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS3, WER 19.1%) with Korean datasets (OLKAVS, KMSAV). See our paper for details.
 
+## Performance
+
+![DOKDO Performance](assets/result.jpeg)
+
+| Dataset | WER (%) | CER (%) |
+|---------|---------|---------|
+| OLKAVS (Seen-speaker) | 41.36 | 22.9 |
+| OLKAVS (Unseen-speaker) | 89.55 | 72.7 |
+| KMSAV (YouTube) | 99.47 | 95.83 |
+
 ## Setup
 
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/<your-username>/dokdo-vsr.git
-cd dokdo-vsr
+git clone https://github.com/sangdeok-EE/DOKDO-VSR.git
+cd DOKDO-VSR
 pip install -r requirements.txt
 ```
 
@@ -22,6 +32,33 @@ pip install -r requirements.txt
 |------|---------------|------|
 | `korean_vsr_hybrid.pt` (~1 GB) | Project root | [Download](https://huggingface.co/dlvusgks/dokdo-vsr) |
 | `model.json` (8 KB) | `benchmarks/LRS3/models/LRS3_V_WER19.1/` | [Auto-AVSR checkpoint](https://drive.google.com/file/d/1t8RHhzDTTvOQkLQhmK1LZGnXRRXOXGi6/view) |
+
+### 3. Prepare tokenizer
+
+**The tokenizer is not included in this repository.** You need to train your own SentencePiece Unigram tokenizer using your Korean speech dataset.
+
+```python
+import sentencepiece as spm
+
+spm.SentencePieceTrainer.train(
+    input='your_korean_transcripts.txt',   # one sentence per line
+    model_prefix='unigram8000',
+    model_type='unigram',
+    vocab_size=8000,
+    unk_id=0,
+    bos_id=1,
+    eos_id=2,
+    pad_id=-1,
+)
+```
+
+Place the trained `unigram8000.model` file in `pipelines/tokens/` and update the path in `configs/korean.ini`:
+
+```ini
+spm_model=pipelines/tokens/unigram8000.model
+```
+
+> **Note:** For best results, the tokenizer should match the vocabulary used during model training. If you use a different tokenizer, the model output may be degraded.
 
 ## Usage
 
@@ -52,8 +89,15 @@ CAMERA_INDEX=1 python demo_webcam.py
 │   ├── pipeline_korean.py      # Inference pipeline
 │   ├── data/                   # Preprocessing
 │   ├── detectors/mediapipe/    # Face detection + lip ROI crop
-│   └── tokens/                 # SentencePiece tokenizer
+│   └── tokens/                 # Place your tokenizer here
 ├── espnet/                     # E2E model architecture
+├── Train/                      # Training code
+│   ├── train.py                # 2-stage training script
+│   ├── model.py                # KoreanVSRModel wrapper
+│   ├── dataset.py              # PyTorch Dataset (.npz)
+│   ├── preprocess.py           # Video → npz preprocessing
+│   └── tokenizer_utils.py      # SentencePiece wrapper
+├── assets/                     # Performance charts
 └── requirements.txt
 ```
 
@@ -75,13 +119,23 @@ Apache 2.0
 
 [Auto-AVSR](https://github.com/mpc001/auto_avsr) (LRS3, WER 19.1%) 사전학습 모델을 한국어 데이터셋(OLKAVS, KMSAV)으로 전이학습하였습니다. 자세한 내용은 논문을 참고하세요.
 
+## 성능
+
+![DOKDO 성능](assets/result.jpeg)
+
+| 데이터셋 | WER (%) | CER (%) |
+|---------|---------|---------|
+| OLKAVS (Seen-speaker) | 41.36 | 22.9 |
+| OLKAVS (Unseen-speaker) | 89.55 | 72.7 |
+| KMSAV (YouTube) | 99.47 | 95.83 |
+
 ## 설치
 
 ### 1. 클론 & 설치
 
 ```bash
-git clone https://github.com/<your-username>/dokdo-vsr.git
-cd dokdo-vsr
+git clone https://github.com/sangdeok-EE/DOKDO-VSR.git
+cd DOKDO-VSR
 pip install -r requirements.txt
 ```
 
@@ -93,6 +147,33 @@ pip install -r requirements.txt
 |------|------|------|
 | `korean_vsr_hybrid.pt` (~1 GB) | 프로젝트 루트 | [다운로드](https://huggingface.co/dlvusgks/dokdo-vsr) |
 | `model.json` (8 KB) | `benchmarks/LRS3/models/LRS3_V_WER19.1/` | [Auto-AVSR 체크포인트](https://drive.google.com/file/d/1t8RHhzDTTvOQkLQhmK1LZGnXRRXOXGi6/view) |
+
+### 3. 토크나이저 준비
+
+**토크나이저는 이 저장소에 포함되어 있지 않습니다.** 한국어 음성 데이터셋을 사용하여 직접 SentencePiece Unigram 토크나이저를 학습해야 합니다.
+
+```python
+import sentencepiece as spm
+
+spm.SentencePieceTrainer.train(
+    input='your_korean_transcripts.txt',   # 한 줄에 문장 하나
+    model_prefix='unigram8000',
+    model_type='unigram',
+    vocab_size=8000,
+    unk_id=0,
+    bos_id=1,
+    eos_id=2,
+    pad_id=-1,
+)
+```
+
+학습된 `unigram8000.model` 파일을 `pipelines/tokens/`에 넣고, `configs/korean.ini`에서 경로를 수정하세요:
+
+```ini
+spm_model=pipelines/tokens/unigram8000.model
+```
+
+> **참고:** 모델 학습 시 사용된 어휘와 동일한 토크나이저를 사용해야 최적의 성능을 얻을 수 있습니다. 다른 토크나이저를 사용하면 모델 출력이 저하될 수 있습니다.
 
 ## 사용법
 
@@ -123,8 +204,15 @@ CAMERA_INDEX=1 python demo_webcam.py
 │   ├── pipeline_korean.py      # 추론 파이프라인
 │   ├── data/                   # 전처리
 │   ├── detectors/mediapipe/    # 얼굴 검출 + 입술 ROI 크롭
-│   └── tokens/                 # SentencePiece 토크나이저
+│   └── tokens/                 # 토크나이저를 여기에 넣으세요
 ├── espnet/                     # E2E 모델 아키텍처
+├── Train/                      # 학습 코드
+│   ├── train.py                # 2단계 학습 스크립트
+│   ├── model.py                # KoreanVSRModel 래퍼
+│   ├── dataset.py              # PyTorch Dataset (.npz)
+│   ├── preprocess.py           # 영상 → npz 전처리
+│   └── tokenizer_utils.py      # SentencePiece 래퍼
+├── assets/                     # 성능 차트
 └── requirements.txt
 ```
 

@@ -23,3 +23,6 @@ ENV/
 # Logs
 result_korean.txt
 webcam_*.mp4
+
+# Tokenizer (train your own — see README)
+pipelines/tokens/*.model
