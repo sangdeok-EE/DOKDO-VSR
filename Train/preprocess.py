@@ -13,8 +13,10 @@ import numpy as np
 import torch
 import cv2
 
-CHAPLIN_ROOT = "<path/to/chaplin>"
-sys.path.insert(0, CHAPLIN_ROOT)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHAPLIN_ROOT = os.environ.get("CHAPLIN_ROOT", PROJECT_ROOT)
+if CHAPLIN_ROOT not in sys.path:
+    sys.path.insert(0, CHAPLIN_ROOT)
 
 from pipelines.detectors.mediapipe.video_process import VideoProcess
 from pipelines.detectors.mediapipe.detector import LandmarksDetector
@@ -238,7 +240,7 @@ def find_video_json_pairs(data_root, json_root=None):
     return pairs
 
 
-def main(data_root, output_dir, json_root=None, detector_type="retinaface",
+def main(data_root, output_dir, json_root=None, detector_type="mediapipe",
          train_ratio=0.8, val_ratio=0.1, seed=42):
     """Main preprocessing pipeline."""
     train_dir = os.path.join(output_dir, "train")
@@ -302,9 +304,9 @@ if __name__ == "__main__":
                         help="JSON label directory (defaults to data_root)")
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Output root directory for preprocessed data")
-    parser.add_argument("--detector", type=str, default="retinaface",
-                        choices=["retinaface", "mediapipe"],
-                        help="Detector type (default: retinaface)")
+    parser.add_argument("--detector", type=str, default="mediapipe",
+                        choices=["mediapipe", "retinaface"],
+                        help="Detector type (default: mediapipe, matching paper Section II.1)")
     parser.add_argument("--train_ratio", type=float, default=0.8,
                         help="Train ratio (default: 0.8)")
     parser.add_argument("--val_ratio", type=float, default=0.1,

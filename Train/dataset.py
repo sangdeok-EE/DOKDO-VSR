@@ -12,8 +12,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-CHAPLIN_ROOT = "<path/to/chaplin>"
-sys.path.insert(0, CHAPLIN_ROOT)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHAPLIN_ROOT = os.environ.get("CHAPLIN_ROOT", PROJECT_ROOT)
+if CHAPLIN_ROOT not in sys.path:
+    sys.path.insert(0, CHAPLIN_ROOT)
 
 
 class KoreanVSRDataset(Dataset):
