@@ -32,7 +32,7 @@
 4. [Two-Stage Transfer Learning & Hybrid Objective](#4-two-stage-transfer-learning--hybrid-objective)
 5. [Quantitative & Qualitative Results (OLKAVS & KMSAV)](#5-quantitative--qualitative-results-olkavs--kmsav)
 6. [On-Device Webcam Pipeline & Latency Measurement Protocol](#6-on-device-webcam-pipeline--latency-measurement-protocol)
-7. [Repository Structure & Paper-to-Code Mapping](#7-repository-structure--paper-to-code-mapping)
+7. [Repository Structure & Code Mapping](#7-repository-structure--code-mapping)
 8. [Setup & End-to-End Reproducible Commands](#8-setup--end-to-end-reproducible-commands)
 
 ---
@@ -98,7 +98,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 * **Distinction Between Training Path and On-Device Inference Path**:
   * **Training**: Both the CTC head ($\lambda = 0.3$) and the 6-layer Transformer Decoder ($1 - \lambda = 0.7$, teacher-forced with `sos_id=1, eos_id=2`) are active so the Conformer encoder internalizes Korean word-order and contextual representations.
-  * **On-Device Inference (`decode=ctc`, Paper Default)**: Bypasses the autoregressive Transformer Decoder—which is the primary latency bottleneck on CPU—and runs **Visual Frontend + Conformer Encoder + CTC Linear Head (`ctc.ctc_lo`) with CTC Greedy decoding**, achieving fast on-device execution. Joint CTC/Attention beam search remains selectable via `--decode hybrid`.
+  * **On-Device Inference (`decode=ctc`, Default)**: Bypasses the autoregressive Transformer Decoder—which is the primary latency bottleneck on CPU—and runs **Visual Frontend + Conformer Encoder + CTC Linear Head (`ctc.ctc_lo`) with CTC Greedy decoding**, achieving fast on-device execution. Joint CTC/Attention beam search remains selectable via `--decode hybrid`.
 
 ### 4.2 Two-Stage Differential-LR Schedule & Convergence Curve
 
@@ -117,9 +117,9 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 ## 5. Quantitative & Qualitative Results (OLKAVS & KMSAV)
 
-### 5.1 Quantitative Benchmark Comparison (Paper Table 1)
+### 5.1 Quantitative Benchmark Comparison
 
-> 📌 **Definition of "Natural Sentence Utterances (자연발화)"**: Throughout our paper and Table 1, *natural utterance* refers to **continuous multi-word sentence-level speech** containing everyday vocabulary and grammatical particles (in contrast to isolated word or digit classification in earlier Korean lip-reading studies), rather than unscripted spontaneous conversation.
+> 📌 **Definition of "Natural Sentence Utterances (자연발화)"**: Here, *natural utterance* refers to **continuous multi-word sentence-level speech** containing everyday vocabulary and grammatical particles (in contrast to isolated word or digit classification in earlier Korean lip-reading studies), rather than unscripted spontaneous conversation.
 
 | Model / Study | Input Modality | Backbone & Decoding | Dataset | Split Condition | WER (%) | CER (%) | Open-Source Code/Weights | On-Device Webcam E2E |
 | :--- | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -133,7 +133,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 | Category | Ground Truth (`REF`) | Model Prediction (`PRED`) | Linguistic & Visual Analysis |
 | :--- | :--- | :--- | :--- |
-| **Live Webcam Demo<br>(Paper Figure 2)** | `요즘 연애를 하고 싶은데 일상이 바빠서 할 수가 없어.` | `요즘 연애 하고 싶은데 일상 바빠서 할수` | Core content words (`요즘`, `연애`, `하고 싶은데`, `일상`, `바빠서`, `할수`) are accurately recognized; short grammatical particles (`를`, `이`) with minimal lip aperture and the trailing ending (`가 없어`) are omitted. |
+| **Live Webcam Demo** | `요즘 연애를 하고 싶은데 일상이 바빠서 할 수가 없어.` | `요즘 연애 하고 싶은데 일상 바빠서 할수` | Core content words (`요즘`, `연애`, `하고 싶은데`, `일상`, `바빠서`, `할수`) are accurately recognized; short grammatical particles (`를`, `이`) with minimal lip aperture and the trailing ending (`가 없어`) are omitted. |
 | **Exact / Near-Exact Matches<br>(OLKAVS Test)** | `오늘 응급실에 다녀왔어.`<br>`병원에 가기 귀찮아.`<br>`건강검진 빨리해야겠다.`<br>`사랑하는 사람과 곧 결혼하게 돼서 기뻐.` | `오늘 응급실에 다녀왔어.`<br>`병원에 가기 귀찮아.`<br>`건강검진 빨리해야겠다.`<br>`사랑하 사람과 곧 결혼하 돼서 기뻐.` | Sentences with distinct bilabial consonants (`ㅁ, ㅂ, ㅍ`) and rounded vowels (`ㅗ, ㅜ`) exhibit high character and word recovery rates. |
 | **Homophene & Particle Variations** | `어머니가 치매라서 요양원을 알아봐야 해서 혼란스러워.`<br>`건강이 안 좋으니 비통함이 느껴져.` | `어머니 치매라 요양원 알아봐야 해서 혼란스러워.`<br>`건강이 안 좋으니 비통함 느껴져.` | Velar/alveolar codas and short postpositions (`가`, `을`, `이`) that share nearly identical mouth shapes (homophenes) occasionally drop while preserving sentence semantics. |
 
@@ -143,14 +143,14 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 <div align="center">
   <img src="assets/result.jpeg" width="82%" alt="DOKDO Real-Time Webcam Demo" />
-  <p align="center"><b>Figure 3.</b> Real-time on-device webcam inference and Korean subtitle overlay running on a MacBook Pro (M5 Pro, CPU) (Paper Figure 2).</p>
+  <p align="center"><b>Figure 3.</b> Real-time on-device webcam inference and Korean subtitle overlay running on a MacBook Pro (M5 Pro, CPU).</p>
 </div>
 
 ### 6.1 Two Webcam Execution Modes (`demo_webcam.py`)
-1. **Manual E2E Benchmark Mode (`python demo_webcam.py --mode manual`, default — Paper Table 2)**
+1. **Manual E2E Benchmark Mode (`python demo_webcam.py --mode manual`, default)**
    * Press `SPACE` to start and stop recording an utterance clip (`1280x720 @ 25fps`).
    * Upon stopping, `KoreanInferencePipeline.forward_with_timing()` runs MediaPipe preprocessing (`t_preprocess`) + VSR inference (`t_infer`) and logs the stage-by-stage latency breakdown to the console and `result_korean.txt`.
-2. **Asynchronous MAR Producer–Consumer Mode (`python demo_webcam.py --mode async` — Paper Figure 1)**
+2. **Asynchronous MAR Producer–Consumer Mode (`python demo_webcam.py --mode async`)**
    * **Producer Thread (`util/lip_tracker_dokdo.py`)**:
      1. **3-Second Frontal Calibration**: Measures the user's closed-mouth 3D Mouth Aspect Ratio (MAR) for 3 seconds to set a personalized threshold (`OPEN_THRESHOLD = mean(MAR) + 0.04`).
      2. **15-Frame Pre-Roll Ring Buffer (`deque(maxlen=15)`)**: Continuously buffers the 15 frames preceding speech onset so word-initial consonants are preserved.
@@ -158,7 +158,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
      4. **Non-Blocking Queue (`queue.Queue(maxsize=4)`)**: Enqueues `(T, 96, 96)` clips with an **oldest-drop** policy when full, keeping the camera loop non-blocking.
    * **Consumer Thread (`demo_webcam.py`)**: Dequeues `(T, 96, 96)` in a background daemon thread, applies `88x88` normalization, runs `KoreanAVSR.infer()`, and overlays Korean subtitles on the live video feed.
 
-### 6.2 Latency Measurement Protocol (`5.0 s` Utterance $\rightarrow$ `6.61 s` Processing Time, Table 2)
+### 6.2 Latency Measurement Protocol (`5.0 s` Utterance $\rightarrow$ `6.61 s` Processing Time)
 
 | Parameter | Specification |
 | :--- | :--- |
@@ -171,7 +171,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 ---
 
-## 7. Repository Structure & Paper-to-Code Mapping
+## 7. Repository Structure & Code Mapping
 
 ```text
 DOKDO-VSR/
@@ -204,8 +204,8 @@ DOKDO-VSR/
 ├── benchmarks/LRS3/models/
 │   └── LRS3_V_WER19.1/model.json    # Auto-AVSR Conformer backbone hyperparameter configuration
 └── assets/
-    ├── pipeline.jpeg                # Paper Figure 1 (System architecture)
-    ├── result.jpeg                  # Paper Figure 2 (Real-time webcam demo screenshot)
+    ├── pipeline.jpeg                # Overall system architecture diagram
+    ├── result.jpeg                  # Real-time webcam demo screenshot
     └── training_curve.svg           # 2-stage transfer learning & KMSAV adaptation convergence plot
 ```
 
@@ -274,9 +274,9 @@ python Train/train.py \
     --freeze_epochs 5 --lr_encoder 1e-5 --lr_head 1e-3
 ```
 
-### Step 5. Quantitative Evaluation (CER & WER — Table 1)
+### Step 5. Quantitative Evaluation (CER & WER)
 ```bash
-# 1) Paper Default Inference Path: CTC Greedy Decoding
+# 1) Default Inference Path: CTC Greedy Decoding
 python Train/evaluate.py \
     --test_dir data/preprocessed/test \
     --checkpoint korean_vsr_hybrid.pt \
@@ -293,29 +293,16 @@ python Train/evaluate.py \
     --output_file eval_result_hybrid.txt
 ```
 
-### Step 6. On-Device Real-Time Webcam Demo (Figure 1, Figure 2, Table 2)
+### Step 6. On-Device Real-Time Webcam Demo
 ```bash
-# Mode A: Manual SPACEbar Recording + Stage-by-Stage Latency Breakdown (Table 2: 5.0s -> 6.61s)
+# Mode A: Manual SPACEbar Recording + Stage-by-Stage Latency Breakdown (5.0s -> 6.61s)
 python demo_webcam.py --mode manual --decode ctc
 
-# Mode B: Asynchronous MAR Auto-Triggered Producer-Consumer Queue Pipeline (Figure 1)
+# Mode B: Asynchronous MAR Auto-Triggered Producer-Consumer Queue Pipeline
 python demo_webcam.py --mode async --decode ctc
 ```
 
 ---
-
-## 📖 Citation (BibTeX)
-
-If you find this repository or our paper useful in your research, please consider citing:
-
-```bibtex
-@article{dokdo2026koreanvsr,
-  title   = {DOKDO: Real-World Validation of an On-Device Korean Lip-Reading System Based on Transfer Learning (전이학습 기반 온디바이스 한국어 립리딩 시스템의 실환경 검증)},
-  author  = {Kim, Sangdeok and Collaborators},
-  journal = {Journal of the Institute of Electronics and Information Engineers (전자공학회논문지)},
-  year    = {2026}
-}
-```
 
 ## 🙏 Acknowledgments & License
 
