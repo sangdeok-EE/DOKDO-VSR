@@ -15,10 +15,18 @@
   <b>🇺🇸 English</b> &nbsp;|&nbsp; <a href="README_KO.md"><b>🇰🇷 한국어 (Korean)</b></a>
 </h3>
 
-<img src="assets/pipeline.jpeg" width="94%" alt="DOKDO System Architecture" />
+<img src="assets/preprocessing_pipeline.png" width="95%" alt="DOKDO Real-Time Capture and Video Preprocessing Pipeline" />
 
 <p align="center">
-  <b>Figure 1.</b> Overall architecture of DOKDO: (Left) Asynchronous MAR-based Producer–Consumer webcam pipeline, (Center) 3D-CNN + ResNet-18 + 12-Layer Conformer visual backbone, and (Right) Two-stage transfer learning with Hybrid CTC + Attention CE loss and Korean SentencePiece Unigram (8,001 tokens).
+  <b>Figure 1.</b> Asynchronous Producer–Consumer capture pipeline and video preprocessing flow: (Top) <b>Process 1</b> (Live Video Capture & MAR-based Utterance Boundary Detection using landmarks <code>78, 13, 14, 308</code>) &rarr; <b>Queue</b> (<code>maxsize = 4</code>) &rarr; <b>Process 2</b> (Video Preprocessing, VSR Inference & Korean Subtitle Print); (Bottom) 4-landmark detection, temporal interpolation & smoothing, similarity affine alignment, <code>96&times;96</code> mouth ROI crop, and <code>88&times;88</code> center crop & normalization (<code>1 &times; T &times; 88 &times; 88</code>).
+</p>
+
+<br/>
+
+<img src="assets/vsr_architecture.png" width="95%" alt="DOKDO VSR Model Training and Inference Architecture" />
+
+<p align="center">
+  <b>Figure 2.</b> DOKDO VSR model architecture and two-stage transfer learning scheme: <b>Phase 1 Freeze</b> (<code>Conv3D</code> + <code>ResNet18</code> + <code>Conformer Encoder</code> frozen) &rarr; <b>Phase 2 Full Fine-Tuning</b> with <b>Hybrid CTC + CE Loss</b> (<i>L = 0.3 &middot; L<sub>CTC</sub> + 0.7 &middot; L<sub>CE</sub></i>, dashed blue training path) and <b>Hybrid Beam Search</b> (<code>CTC 0.3 : Decoder 0.7, Beam Size = 10</code>) + <b>SentencePiece Unigram8000</b> decoding (solid black inference path).
 </p>
 
 </div>
@@ -104,7 +112,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 <div align="center">
   <img src="assets/training_curve.svg" width="88%" alt="DOKDO Training Convergence Curve" />
-  <p align="center"><b>Figure 2.</b> Training and validation loss convergence across Phase 1 (Encoder frozen, Epochs 1–5), Phase 2 (Full fine-tuning with differential LR on OLKAVS, Epochs 6–95), and Stage 2 KMSAV domain adaptation.</p>
+  <p align="center"><b>Figure 3.</b> Training and validation loss convergence across Phase 1 (Encoder frozen, Epochs 1–5), Phase 2 (Full fine-tuning with differential LR on OLKAVS, Epochs 6–95), and Stage 2 KMSAV domain adaptation.</p>
 </div>
 
 | Training Phase | Epochs | Trainable Modules | Frozen Modules | Learning Rate (`AdamW`, `wd=0.01`) | Purpose & Behavior |
@@ -143,7 +151,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 <div align="center">
   <img src="assets/result.jpeg" width="82%" alt="DOKDO Real-Time Webcam Demo" />
-  <p align="center"><b>Figure 3.</b> Real-time on-device webcam inference and Korean subtitle overlay running on a MacBook Pro (M5 Pro, CPU).</p>
+  <p align="center"><b>Figure 4.</b> Real-time on-device webcam inference and Korean subtitle overlay running on a MacBook Pro (M5 Pro, CPU).</p>
 </div>
 
 ### 6.1 Two Webcam Execution Modes (`demo_webcam.py`)
@@ -204,9 +212,11 @@ DOKDO-VSR/
 ├── benchmarks/LRS3/models/
 │   └── LRS3_V_WER19.1/model.json    # Auto-AVSR Conformer backbone hyperparameter configuration
 └── assets/
-    ├── pipeline.jpeg                # Overall system architecture diagram
-    ├── result.jpeg                  # Real-time webcam demo screenshot
-    └── training_curve.svg           # 2-stage transfer learning & KMSAV adaptation convergence plot
+    ├── preprocessing_pipeline.png   # Figure 1 (Capture/Queue pipeline & video preprocessing flow)
+    ├── vsr_architecture.png         # Figure 2 (VSR model architecture, Phase 1/2 & training/inference paths)
+    ├── pipeline.jpeg                # Combined system architecture overview
+    ├── result.jpeg                  # Figure 4 (Real-time webcam demo screenshot)
+    └── training_curve.svg           # Figure 3 (2-stage transfer learning & KMSAV convergence plot)
 ```
 
 ---

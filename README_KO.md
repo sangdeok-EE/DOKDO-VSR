@@ -15,10 +15,18 @@
   <a href="README.md"><b>🇺🇸 English</b></a> &nbsp;|&nbsp; <b>🇰🇷 한국어 (Korean)</b>
 </h3>
 
-<img src="assets/pipeline.jpeg" width="94%" alt="DOKDO System Architecture" />
+<img src="assets/preprocessing_pipeline.png" width="95%" alt="DOKDO Real-Time Capture and Video Preprocessing Pipeline" />
 
 <p align="center">
-  <b>그림 1.</b> DOKDO 전체 시스템 아키텍처: (좌) 비동기 MAR 기반 생산자–소비자(Producer–Consumer) 실시간 웹캠 파이프라인, (중) 3D-CNN + ResNet-18 + 12-Layer Conformer 시각적 백본, (우) 한국어 SentencePiece Unigram(8,001 토큰) 및 CTC + Attention CE 혼합 손실 기반 2단계 전이학습 구조.
+  <b>그림 1.</b> 비동기 생산자–소비자(Producer–Consumer) 캡처 파이프라인 및 비디오 전처리 구조: (상) <b>Process 1</b> (실시간 비디오 캡처 및 랜드마크 <code>78, 13, 14, 308</code> 기반 MAR 발화 경계 검출) &rarr; <b>Queue</b> (<code>maxsize = 4</code>) &rarr; <b>Process 2</b> (비디오 전처리, VSR 추론 및 한국어 자막 출력); (하) 4점 랜드마크 검출, 시간축 보간(Interpolation) 및 스무딩(Smoothing), 아핀 얼굴 정렬(Affine Transform), <code>96&times;96</code> 입술 ROI 크롭 및 <code>88&times;88</code> 센터 크롭·정규화 (<code>1 &times; T &times; 88 &times; 88</code>).
+</p>
+
+<br/>
+
+<img src="assets/vsr_architecture.png" width="95%" alt="DOKDO VSR Model Training and Inference Architecture" />
+
+<p align="center">
+  <b>그림 2.</b> DOKDO VSR 모델 아키텍처 및 2단계 전이학습 구조: <b>Phase 1 Freeze</b> (<code>Conv3D</code> + <code>ResNet18</code> + <code>Conformer Encoder</code> 동결) &rarr; <b>Phase 2 전체 미세조정</b> 및 <b>Hybrid CTC + CE Loss</b> (<i>L = 0.3 &middot; L<sub>CTC</sub> + 0.7 &middot; L<sub>CE</sub></i>, 파란색 점선 학습 경로), <b>Hybrid Beam Search</b> (<code>CTC 0.3 : Decoder 0.7, Beam Size = 10</code>) + <b>SentencePiece Unigram8000</b> 디코딩 (검은색 실선 추론 경로).
 </p>
 
 </div>
@@ -104,7 +112,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 <div align="center">
   <img src="assets/training_curve.svg" width="88%" alt="DOKDO Training Convergence Curve" />
-  <p align="center"><b>그림 2.</b> Phase 1(백본 동결, Epoch 1–5), Phase 2(차등 학습률 전체 미세조정, Epoch 6–95) 및 Stage 2 KMSAV 도메인 적응 과정의 학습·검증 손실 수렴 곡선.</p>
+  <p align="center"><b>그림 3.</b> Phase 1(백본 동결, Epoch 1–5), Phase 2(차등 학습률 전체 미세조정, Epoch 6–95) 및 Stage 2 KMSAV 도메인 적응 과정의 학습·검증 손실 수렴 곡선.</p>
 </div>
 
 | 학습 단계 | 에폭 구간 | 학습 대상 모듈 | 동결 모듈 | 학습률 설정 (`AdamW`, `wd=0.01`) | 설계 목적 및 동작 원리 |
@@ -143,7 +151,7 @@ $$L = \lambda L_{\text{CTC}} + (1 - \lambda) L_{\text{CE}}, \quad \lambda = 0.3$
 
 <div align="center">
   <img src="assets/result.jpeg" width="82%" alt="DOKDO Real-Time Webcam Demo" />
-  <p align="center"><b>그림 3.</b> MacBook Pro(M5 Pro, CPU)에서 구동 중인 온디바이스 실시간 웹캠 추론 및 한국어 자막 오버레이 화면.</p>
+  <p align="center"><b>그림 4.</b> MacBook Pro(M5 Pro, CPU)에서 구동 중인 온디바이스 실시간 웹캠 추론 및 한국어 자막 오버레이 화면.</p>
 </div>
 
 ### 6.1 두 가지 웹캠 실행 모드 (`demo_webcam.py`)
@@ -204,9 +212,11 @@ DOKDO-VSR/
 ├── benchmarks/LRS3/models/
 │   └── LRS3_V_WER19.1/model.json    # Auto-AVSR Conformer 백본 하이퍼파라미터 설정 파일
 └── assets/
-    ├── pipeline.jpeg                # 전체 시스템 아키텍처 다이어그램
-    ├── result.jpeg                  # 실시간 온디바이스 웹캠 데모 실행 화면
-    └── training_curve.svg           # 2단계 전이학습 및 KMSAV 도메인 적응 손실 수렴 그래프
+    ├── preprocessing_pipeline.png   # 그림 1 (비동기 캡처/큐 파이프라인 및 비디오 전처리 상세 구조)
+    ├── vsr_architecture.png         # 그림 2 (VSR 모델 아키텍처, Phase 1/2 및 학습·추론 경로)
+    ├── pipeline.jpeg                # 통합 시스템 아키텍처 다이어그램
+    ├── result.jpeg                  # 그림 4 (실시간 온디바이스 웹캠 데모 실행 화면)
+    └── training_curve.svg           # 그림 3 (2단계 전이학습 및 KMSAV 도메인 적응 손실 수렴 그래프)
 ```
 
 ---
